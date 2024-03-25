@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Masonry</title>
+    <link rel="stylesheet" href="block.css">
+    <script src="https://codepen.io/steveg3003/pen/zBVakw"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+
+</head>
+<body>
+    <div id="container">
+        <div id="game">    
+        </div>
+        <div class="scoreContainer">
+            <div class="scoreBlock">
+                <div id="score"><img id="scoreImg" src="/img/block.png" alt="score"> 0 </div>
+                <div id="bestScore">Best Score: 0</div>
+            </div>
+            <div class="exContainer">
+                <div id="rBtn1"><img src="/img/reload.png" alt="재시작"></div>
+                <div id="cBtn"><img src="/img/close.png" alt="나가기"></div>
+            </div>
+        </div>
+        <div class="game-ready">
+            <div id="start-button">START</div>
+        </div>
+        <div class="nPopup">
+            <div id="nPopup-content">
+                <h1>How To</h1>
+                <p>- 화면이 전환되면 또 한 번의 마우스 클릭으로 게임을 시작한다.</p>
+                <p>- 상/하/좌/우에서 날아오는 블록을 기존 블록에 정확히 안착 시킨다.</p>
+                <p>- 정확하지 않은 나머지 면적의 블록은 제거되며, 크기 또한 작아진다.</p>
+                <p>- 작아진 블록위에 최대한 높이 쌓아 올리는 걸 목적으로 하여 플레이한다.</p>
+                <p>- 블록에 안착 시키지 못할 경우에는 즉시 GAME OVER된다.</p>
+                <p>- 게임의 재 진행을 원할 시에는 단축키 ‘Q’ 버튼을 클릭한다.</p>
+                <div id="sbtn">▶</div>
+            </div>
+        </div>
+        <div id="goPopup" style="display: none;">
+            <div id="goPopup-content">
+                <h1>Game Over!</h1>
+                <h2 id="final-score"></h2>
+                <h3 id="best-score"></h3>
+                <div class="btn-container">
+                    <button id="rBtn"><img src="/img/reload.png" alt="재시작"></button>
+                    <button id="nBtn"><img src="/img/close.png" alt="나가기"></button>
+                </div>
+            </div>
+        </div>
+        <div id="ePopup" style="display: none;">
+            <div class="end-content">
+                <h1>WARNING!</h1>
+                <p>점수를 모두 잃게 됩니다.</p>
+                <p>그래도 나가시겠습니까?</p>
+                <div class="btn-last">
+                    <button id="okBtn">OK</button><br>
+                    <button id="noBtn">NO</button>
+                </div>
+            </div>
+        </div>
+
+        <audio id="gameBgm" src="/media/blockBGM.mp3"></audio>
+    </div>
+    <script src="block.js"></script>
+</body>
+</html>

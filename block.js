@@ -1,4 +1,7 @@
 console.clear();
+var abc = 'y';
+var normalBlock ;
+
 var Stage = /** @class */ (function () {
     function Stage() {
 
@@ -61,7 +64,7 @@ var Stage = /** @class */ (function () {
 
 var Block = /** @class */ (function () {
     function Block(block) {
-
+        
         this.STATES = { ACTIVE: 'active', STOPPED: 'stopped', MISSED: 'missed' };
         this.MOVE_AMOUNT = 12;
         this.dimension = { width: 0, height: 0, depth: 0 };
@@ -79,6 +82,7 @@ var Block = /** @class */ (function () {
         this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
         this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
 
+        var randomNumber = Math.floor(Math.random() * 10) % 7;
         if (!this.targetBlock) {
             this.color = 0x333344;
         } else {
@@ -86,7 +90,13 @@ var Block = /** @class */ (function () {
             var r = Math.sin(0.3 * offset) * 55 + 200;
             var g = Math.sin(0.3 * offset + 2) * 55 + 200;
             var b = Math.sin(0.3 * offset + 4) * 55 + 200;
-            this.color = new THREE.Color(r / 255, g / 255, b / 255);
+            if (randomNumber == 2) {
+                this.color = 0xFF0000;
+                abc = 'n';
+            }else {
+                this.color = new THREE.Color(r / 255, g / 255, b / 255);
+                abc = 'y';
+            }
         }
 
         this.state = this.index > 1 ? this.STATES.ACTIVE : this. STATES.STOPPED;
@@ -103,6 +113,8 @@ var Block = /** @class */ (function () {
         this.mesh.position.set(this.position.x, this.position.y + (this.state == this.STATES.ACTIVE ? 0 : 0), this.position.z);
         if (this.state == this.STATES.ACTIVE) {
             this.position[this.workingPlane] = Math.random() > 0.5 ? -this.MOVE_AMOUNT : this.MOVE_AMOUNT;
+        } else if (this.state == this.STATES.STOPPED) {
+            normalBlock = this;
         }
     }
 
@@ -191,7 +203,8 @@ var Game = /** @class */ (function () {
         this.mainContainer = document.getElementById('container');
         this.scoreContainer = document.getElementById('score');
         this.bestScoreContainer = document.getElementById('bestScore');
-        this.startButton = document.getElementById('start-button');
+        this.normalButton = document.getElementById('normal-button');
+        this.hardButton = document.getElementById('hard-button');
         this.noticeStartBtn = document.getElementById('sbtn');
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
@@ -247,6 +260,9 @@ var Game = /** @class */ (function () {
                 var noticePopup = document.querySelector('.nPopup');
                 noticePopup.style.display = 'block';   
                 isRestartClicked = true;
+
+                var currentBlock = game.blocks[game.blocks.length - 1];
+                currentBlock.state = game.STATES.STOPPED;
                 
                 document.getElementById('sbtn').addEventListener('click', function () {
                     game.restartGame();
@@ -265,6 +281,8 @@ var Game = /** @class */ (function () {
                 var noticePopup = document.querySelector('.nPopup');
                 noticePopup.style.display = 'block';
                 isRestartClicked = true;
+                var currentBlock = game.blocks[game.blocks.length - 1];
+                currentBlock.state = game.STATES.STOPPED;
         
                 document.getElementById('sbtn').addEventListener('click', function () {
                     game.restartGame();
@@ -283,6 +301,9 @@ var Game = /** @class */ (function () {
 
                 isCloseClicked = true;
                 document.getElementById('ePopup').style.display = 'block';
+
+                var currentBlock = game.blocks[game.blocks.length - 1];
+                currentBlock.state = game.STATES.STOPPED;
                 console.log('Close button clicked');
             });
 
@@ -297,30 +318,32 @@ var Game = /** @class */ (function () {
                 popupCloseButton.addEventListener('click', function () {
                     document.getElementById('ePopup').style.display = 'none';
                     isCloseClicked = false;
-         
+                    
+                    var currentBlock = game.blocks[game.blocks.length - 1];
+                    currentBlock.state = game.STATES.ACTIVE;
                     console.log('Popup close button clicked');
+
+                    // 진행중인 게임을 다시 시작
+                    if (game.state !== game.STATES.PLAYING) {
+                        game.state = game.STATES.PLAYING;
+                        game.tick();
+                    }
                 });
             }
         }
         
-        this.startButton.addEventListener('click', function () {
+        this.normalButton.addEventListener('click', function () {
             _this.showNoticePopup();
         });
 
-        var backgroundMusic = document.getElementById('gameBgm');
-        backgroundMusic.volume = 0.5;
-    }
-
-    Game.prototype.playBackgroundMusic = function () {
-        backgroundMusic.play();
-    }
-
-    Game.prototype.pauseBackgroundMusic = function () {
-        backgroundMusic.pause();
+        this.hardButton.addEventListener('click', function () {
+            _this.showNoticePopup();
+        });
     }
 
     Game.prototype.showNoticePopup = function () {
-        this.startButton.style.display = 'none';
+        this.normalButton.style.display = 'none';
+        this.hardButton.style.display = 'none';
         this.noticePopup.style.display = 'block';
     };
 
@@ -342,6 +365,21 @@ var Game = /** @class */ (function () {
         }
     };
 
+    function playBackgroundMusic() {
+        var bgMusic = document.getElementById('gameBgm');
+        if (bgMusic) {
+            bgMusic.play();
+        }
+    }
+
+    // 게임 종료 시 배경음악 정지 함수
+    function stopBackgroundMusic() {
+        var bgMusic = document.getElementById('gameBgm');
+        if (bgMusic) {
+            bgMusic.pause();
+        }
+    }
+
     Game.prototype.startGame = function () {
         if (this.state != this.STATES.PLAYING) {
             this.score = 0;
@@ -350,7 +388,8 @@ var Game = /** @class */ (function () {
             this.updateState(this.STATES.PLAYING);
             this.addBlock();
             // localStorage.removeItem('bestScore');
-            this.playBackgroundMusic();
+
+            playBackgroundMusic();
         }
     };
 
@@ -407,8 +446,8 @@ var Game = /** @class */ (function () {
             var rotateRandomess = 10;
             var rotationParams = {
                 delay: 0.05,
-                x: newBlocks.place == 'z' ? ((Math.random() * rotateRandomess) - (rotateRandomess / 2)) : 0.1,
-                z: newBlocks.place == 'x' ? ((Math.random() * rotateRandomess) - (rotateRandomess / 2)) : 0.1,
+                x: newBlocks.place == 'x' ? ((Math.random() * rotateRandomess) - (rotateRandomess / 2)) : 0.1,
+                z: newBlocks.place == 'z' ? ((Math.random() * rotateRandomess) - (rotateRandomess / 2)) : 0.1,
                 y: Math.random() * 0.1,
             };
 
@@ -426,16 +465,29 @@ var Game = /** @class */ (function () {
 
     Game.prototype.addBlock = function () {
         var lastBlock = this. blocks[this.blocks.length -1]
-        if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
-            return this.endGame();
+        if (abc == 'y') {
+            if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
+                return this.endGame();
+            }
+            this.score = this.blocks.length - 1;
+            this.scoreContainer.innerHTML = this.score;
+            this.bestScoreContainer.innerHTML = 'Best Score: ' + this.bestScore;
+            var newKidOnTheBlock = new Block(lastBlock);
+            this.newBlocks.add(newKidOnTheBlock.mesh);
+            this.blocks.push(newKidOnTheBlock);
+            this.stage.setCamera(this.blocks.length * 2);
+            normalBlock = lastBlock;
+        } else {
+            if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
+                lastBlock = normalBlock;
+                var newKidOnTheBlock = new Block(lastBlock);
+                this.newBlocks.add(newKidOnTheBlock.mesh);
+                this.blocks.push(newKidOnTheBlock);
+                normalBlock = lastBlock;
+            } else {
+                return this.endGame();
+            }
         }
-        this.score = this.blocks.length - 1;
-        this.scoreContainer.innerHTML = this.score;
-        this.bestScoreContainer.innerHTML = 'Best Score: ' + this.bestScore;
-        var newKidOnTheBlock = new Block(lastBlock);
-        this.newBlocks.add(newKidOnTheBlock.mesh);
-        this.blocks.push(newKidOnTheBlock);
-        this.stage.setCamera(this.blocks.length * 2);
     };
 
     Game.prototype.endGame = function () {
@@ -446,7 +498,7 @@ var Game = /** @class */ (function () {
         var rBtnElement = document.getElementById('rBtn');
         
         if (finalScoreElement) {
-            finalScoreElement.textContent = 'Final Score: ' + this.score;
+            finalScoreElement.textContent = this.score;
         } else {
             console.error("Final score display element not found.");
         }
@@ -478,7 +530,7 @@ var Game = /** @class */ (function () {
         this.updateScoreDisplay();
         this.updateState(this.STATES.ENDED);
 
-        this.pauseBackgroundMusic();
+        stopBackgroundMusic();
     };
 
     Game.prototype.tick = function () {
@@ -507,8 +559,7 @@ var Game = /** @class */ (function () {
             scoreElement.innerHTML = this.score;
             bestScoreElement.innerHTML = 'Best Score: ' + this.bestScore;
 
-            // document.getElementById('score').src = "/img/block.png";
-        } else {
+            } else {
             console.error("Score or Best Score display element not found.");
         }
     };

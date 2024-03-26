@@ -149,8 +149,8 @@ html, body {
     justify-content: center;
 }
 
-#start-button {
-    position: absolute;
+#normal-button, #hard-button{
+    position: relative;
     transform: translatey(-300px);
     opacity: 1;
     padding: 40px 50px;
@@ -159,6 +159,8 @@ html, body {
     border-radius: 10px;
     font-size: xx-large;
     cursor: pointer;
+    margin: 0 10px;
+    box-shadow: 10px 10px 3px gray;
 }
 
 .nPopup {
@@ -221,7 +223,7 @@ html, body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
-    line-height: 2;
+    line-height: 3;
 }
 
 .end-content h1 {
@@ -249,24 +251,27 @@ html, body {
     align-items: center;   
 }
 
+h2#final-score {
+    background-image: url('./img/block.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    padding-left: 50px;
+    margin-left: 70px;
+}
+
 #container.playing #score, #container.resetting #score {
-    background-image: url('/img/block.png');
+    background-image: url('./img/block.png');
     background-size: contain; 
     background-repeat: no-repeat;
-    
-    width: 30px;
+    padding-left: 34px;
+    width: 100px;
     height: 30px;
     transform: translatey(0px) scale(1);
 }
-
-/* #score #scoreImg {
-    background-image: url('/img/block.png');
-    background-size: contain; 
-    background-repeat: no-repeat;
-    background-position: left;
-    width: 30px;
-    height: 30px; 
-} */
 
 #container.playing #bestScore, #container.resetting #bestScore {
     transform: translatey(0px) scale(1);

@@ -32,6 +32,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width : 150px;
 }
 
 .scoreContainer .scoreBlock div {
@@ -39,7 +40,8 @@ html, body {
 }
 
 .scoreContainer #score {
-    font-size: 30px;
+    width : 150px;
+    font-size: 20px;
 }
 
 .exContainer {
@@ -251,36 +253,44 @@ html, body {
     align-items: center;   
 }
 
-h2#final-score {
+h3#final-score {
     background-image: url('./img/block.png');
     background-size: contain;
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
-    width: 30px;
+    width: 150px;
     height: 30px;
     padding-left: 50px;
-    margin-left: 70px;
+    margin-left: 30px;
 }
 
-#container.playing #score, #container.resetting #score {
+#backBtn {
+    border: 0;
+    background-color: white;
+    float: right;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#container.playing #score, #container.resetting #score, #container.onready #score {
     background-image: url('./img/block.png');
     background-size: contain; 
     background-repeat: no-repeat;
     padding-left: 34px;
-    width: 100px;
+    width: 140px;
     height: 30px;
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #bestScore, #container.resetting #bestScore {
+#container.playing #bestScore, #container.resetting #bestScore, #container.onready #bestScore{
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #rBtn1, #container.resetting #rBtn1 {
+#container.playing #rBtn1, #container.resetting #rBtn1, #container.onready #rBtn1 {
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #cBtn, #container.resetting #cBtn {
+#container.playing #cBtn, #container.resetting #cBtn, #container.onready #cBtn {
     transform: translatey(0px) scale(1);
 }

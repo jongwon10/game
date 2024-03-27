@@ -1,6 +1,7 @@
 console.clear();
-var abc = 'y';
-var normalBlock ;
+var basic = 'y';
+var normalBlock;
+var currentMode;
 
 var Stage = /** @class */ (function () {
     function Stage() {
@@ -90,12 +91,12 @@ var Block = /** @class */ (function () {
             var r = Math.sin(0.3 * offset) * 55 + 200;
             var g = Math.sin(0.3 * offset + 2) * 55 + 200;
             var b = Math.sin(0.3 * offset + 4) * 55 + 200;
-            if (randomNumber == 2) {
+            if (randomNumber == 2 && currentMode == 'hard') {
                 this.color = 0xFF0000;
-                abc = 'n';
+                basic = 'n';
             }else {
                 this.color = new THREE.Color(r / 255, g / 255, b / 255);
-                abc = 'y';
+                basic = 'y';
             }
         }
 
@@ -195,7 +196,9 @@ var Game = /** @class */ (function () {
             'READY': 'ready',
             'ENDED': 'ended',
             'RESETTING': 'resetting',
-            'STARTED': 'started'
+            'STARTED': 'started',
+            'ACTIVE': 'active',
+            'ONREADY': 'onready'
         };
         this.blocks = [];
         this.state = this.STATES.LOADING;
@@ -203,8 +206,8 @@ var Game = /** @class */ (function () {
         this.mainContainer = document.getElementById('container');
         this.scoreContainer = document.getElementById('score');
         this.bestScoreContainer = document.getElementById('bestScore');
-        this.normalButton = document.getElementById('normal-button');
-        this.hardButton = document.getElementById('hard-button');
+        var normalButton = document.getElementById('normal-button');
+        var hardButton = document.getElementById('hard-button');
         this.noticeStartBtn = document.getElementById('sbtn');
         this.newBlocks = new THREE.Group();
         this.placedBlocks = new THREE.Group();
@@ -216,14 +219,14 @@ var Game = /** @class */ (function () {
         this.tick();
         this.updateState(this.STATES.READY);
 
-        this.score = 0;
+        this.scoreContainer.innerHTML = currentMode + " : 0";
         this.bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
 
         this.updateScoreDisplay();
         this.updateBestScoreDisplay();
 
-        this.noticePopup = document.querySelector('.nPopup');
-        this.noticePopup.style.display = 'none';  
+        var noticePopup = document.querySelector('.nPopup');
+        noticePopup.style.display = 'none';        
 
         // document.addEventListener('keydown', function (e) {
         //     if (_this.state === _this.STATES.PLAYING && e.keyCode === 32) {
@@ -234,7 +237,7 @@ var Game = /** @class */ (function () {
         
         document.addEventListener('click', function (e) {
 
-            if (_this.state === _this.STATES.READY && e.target.id === 'sbtn') {
+            if (_this.state === _this.STATES.ONREADY && e.target.id === 'sbtn') {
                 console.log('sbtn');
                 _this.hideNoticePopup();
                 _this.startGame();
@@ -257,8 +260,7 @@ var Game = /** @class */ (function () {
                     e.preventDefault();
                     return false;
                 }
-                var noticePopup = document.querySelector('.nPopup');
-                noticePopup.style.display = 'block';   
+                noticePopup.style.display = 'block';
                 isRestartClicked = true;
 
                 var currentBlock = game.blocks[game.blocks.length - 1];
@@ -267,6 +269,14 @@ var Game = /** @class */ (function () {
                 document.getElementById('sbtn').addEventListener('click', function () {
                     game.restartGame();
                     noticePopup.style.display = 'none';
+                    isRestartClicked = false;
+                });
+
+                document.getElementById('backBtn').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    normalButton.style.display = 'none';
+                    hardButton.style.display = 'none';
+                    location.reload();
                     isRestartClicked = false;
                 });
             });
@@ -278,7 +288,6 @@ var Game = /** @class */ (function () {
                     e.preventDefault();
                     return false;
                 }
-                var noticePopup = document.querySelector('.nPopup');
                 noticePopup.style.display = 'block';
                 isRestartClicked = true;
                 var currentBlock = game.blocks[game.blocks.length - 1];
@@ -289,11 +298,19 @@ var Game = /** @class */ (function () {
                     noticePopup.style.display = 'none';
                     isRestartClicked = false;
                 });
+
+                document.getElementById('backBtn').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    normalButton.style.display = 'none';
+                    hardButton.style.display = 'none';
+                    location.reload();
+                    isRestartClicked = false;
+                });
             }
         });
 
         if (closeButton) {
-            closeButton.addEventListener('click', function () {
+            closeButton.addEventListener('click', function (e) {
                 if (isRestartClicked) {
                     e.preventDefault();
                     return false;
@@ -323,32 +340,52 @@ var Game = /** @class */ (function () {
                     currentBlock.state = game.STATES.ACTIVE;
                     console.log('Popup close button clicked');
 
-                    // 진행중인 게임을 다시 시작
-                    if (game.state !== game.STATES.PLAYING) {
                         game.state = game.STATES.PLAYING;
                         game.tick();
-                    }
+                        currentBlock.tick();
                 });
             }
         }
         
-        this.normalButton.addEventListener('click', function () {
+        normalButton.addEventListener('click', function () {
+            currentMode = 'normal';
+            game.updateState(game.STATES.ONREADY);
+            document.getElementById('score').innerText = currentMode + ' : 0 ';
             _this.showNoticePopup();
         });
 
-        this.hardButton.addEventListener('click', function () {
+        hardButton.addEventListener('click', function () {
+            currentMode = 'hard';
+            document.getElementById('score').innerText = currentMode + ' : 0 ';
+            game.updateState(game.STATES.ONREADY);
             _this.showNoticePopup();
+        });
+
+
+        var backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', function() {
+            noticePopup.style.display = 'none';
+            normalButton.style.display = 'block';
+            hardButton.style.display = 'block';
         });
     }
 
     Game.prototype.showNoticePopup = function () {
-        this.normalButton.style.display = 'none';
-        this.hardButton.style.display = 'none';
-        this.noticePopup.style.display = 'block';
+        var normalButton = document.getElementById('normal-button');
+        var hardButton = document.getElementById('hard-button');
+        var noticePopup = document.querySelector('.nPopup');
+        normalButton.style.display = 'none';
+        hardButton.style.display = 'none';
+        noticePopup.style.display = 'block';
     };
 
     Game.prototype.hideNoticePopup = function () {
-        this.noticePopup.style.display = 'none';
+        var normalButton = document.getElementById('normal-button');
+        var hardButton = document.getElementById('hard-button');
+        var noticePopup = document.querySelector('.nPopup');
+        noticePopup.style.display = 'none';
+        normalButton.style.display = 'none';
+        hardButton.style.display = 'none';
     };
 
     Game.prototype.updateState = function (newState) {
@@ -382,10 +419,10 @@ var Game = /** @class */ (function () {
 
     Game.prototype.startGame = function () {
         if (this.state != this.STATES.PLAYING) {
-            this.score = 0;
+            this.state = game.STATES.PLAYING;
+            document.getElementById('score').innerText = currentMode + ' : 0 ';
             this.bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
             this.updateScoreDisplay();
-            this.updateState(this.STATES.PLAYING);
             this.addBlock();
             // localStorage.removeItem('bestScore');
 
@@ -400,6 +437,7 @@ var Game = /** @class */ (function () {
     }
 
     Game.prototype.restartGame = function () {
+        basic = 'y';
         var _this = this;
         this.clearGroup(this.newBlocks);
         this.clearGroup(this.placedBlocks);
@@ -421,14 +459,23 @@ var Game = /** @class */ (function () {
         var cameraMoveSpeed = removeSpeed * 2 + (oldBlocks.length * delayAmount);
         this.stage.setCamera(2, cameraMoveSpeed);
         var countdown = { value: this.blocks.length - 1 };
-        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.scoreContainer.innerHTML =  'Score: ' + String(Math.round(countdown.value)); } });
+        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.scoreContainer.innerHTML =  currentMode + ' : ' + String(Math.round(countdown.value)); } });
         TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.bestScoreContainer.innerHTML =  'Best Score: ' + String(Math.round(countdown.value)); } });
         this.blocks = this.blocks.slice(0, 1);
         this.addBlock();
         
+        
         setTimeout(function () {
             _this.startGame();
         }, cameraMoveSpeed * 1000);
+    };
+
+    Game.prototype.playBlockSound = function () {
+        var blockSound = document.getElementById('blockSound');
+        if (blockSound) {
+            blockSound.currentTime = 0;
+            blockSound.play();
+        }
     };
 
     Game.prototype.placeBlock = function () {
@@ -459,18 +506,21 @@ var Game = /** @class */ (function () {
 
             TweenLite.to(newBlocks.chopped.position, 1, positionParams);
             TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
+
+            this.playBlockSound();
         }
         this.addBlock();
     };
 
     Game.prototype.addBlock = function () {
-        var lastBlock = this. blocks[this.blocks.length -1]
-        if (abc == 'y') {
+        var lastBlock = this.blocks[this.blocks.length -1];
+        console.log(lastBlock);
+        if (basic == 'y') {
             if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
                 return this.endGame();
             }
             this.score = this.blocks.length - 1;
-            this.scoreContainer.innerHTML = this.score;
+            this.scoreContainer.innerHTML = currentMode + " : " + this.score;
             this.bestScoreContainer.innerHTML = 'Best Score: ' + this.bestScore;
             var newKidOnTheBlock = new Block(lastBlock);
             this.newBlocks.add(newKidOnTheBlock.mesh);
@@ -498,7 +548,7 @@ var Game = /** @class */ (function () {
         var rBtnElement = document.getElementById('rBtn');
         
         if (finalScoreElement) {
-            finalScoreElement.textContent = this.score;
+            finalScoreElement.textContent = currentMode + " : " + this.score;
         } else {
             console.error("Final score display element not found.");
         }
@@ -556,10 +606,9 @@ var Game = /** @class */ (function () {
         var scoreElement = document.getElementById('score');
         var bestScoreElement = document.getElementById('bestScore');
         if (scoreElement && bestScoreElement) {
-            scoreElement.innerHTML = this.score;
+            scoreElement.innerHTML = currentMode + ' : ' + this.score;
             bestScoreElement.innerHTML = 'Best Score: ' + this.bestScore;
-
-            } else {
+        } else {
             console.error("Score or Best Score display element not found.");
         }
     };

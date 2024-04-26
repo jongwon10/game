@@ -48,7 +48,7 @@ html, body {
     padding: 5px 10px;
     color: #D0CBC7;
     border: none;
-    cursor: pointer;
+    /* cursor: pointer; */
     display: flex;
     align-items: center;
 }
@@ -56,16 +56,31 @@ html, body {
 .exContainer button {
     border: 0;
     background: #D0CBC7;
-    cursor: pointer;
+    /* cursor: pointer; */
     margin: 0 5px;
 }
 
 #rBtn1, #cBtn {
     border: 0;
     background: #D0CBC7;
-    cursor: pointer !important;
+    cursor: pointer;
     margin: 0 5px;
     pointer-events: auto;
+}
+
+#container.onready #rBtn1 {
+    cursor: default;
+}
+
+#container.onready #cBtn {
+    cursor: default;
+}
+
+#container.endscore #rBtn1 {
+    cursor: default;
+}
+#container.endscore #cBtn {
+    cursor: default;
 }
 
 .exContainer img {
@@ -116,11 +131,16 @@ html, body {
 
 #goPopup-content {
     background-color: white;
-    padding:30px;
+    padding: 10px 50px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
     line-height: 2;
+}
+
+#goPopup-content h1 {
+    margin-top: 20px;
+    margin-bottom: 35px;
 }
 
 .btn-container {
@@ -221,20 +241,20 @@ html, body {
 
 .end-content {
     background-color: white;
-    padding:30px;
+    padding: 10px 50px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
-    line-height: 3;
+    line-height: 2;
 }
 
 .end-content h1 {
     margin-top: 20px;
-    margin-bottom: 50px;
+    margin-bottom: 35px;
 }
 .end-content p {
     font-size: 20px;
-    margin-bottom: 15px;
+    /* margin-bottom: 15px; */
 }
 
 .end-content button {
@@ -249,7 +269,7 @@ html, body {
 .end-content .btn-last {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;   
 }
 
@@ -262,7 +282,7 @@ h3#final-score {
     width: 150px;
     height: 30px;
     padding-left: 50px;
-    margin-left: 30px;
+    margin-left: 40px;
 }
 
 #backBtn {
@@ -273,24 +293,24 @@ h3#final-score {
     margin-top: 20px;
 }
 
-#container.playing #score, #container.resetting #score, #container.onready #score {
+#container.playing #score, #container.resetting #score, #container.onready #score, #container.endscore #score {
     background-image: url('./img/block.png');
     background-size: contain; 
     background-repeat: no-repeat;
-    padding-left: 34px;
-    width: 140px;
+    padding-left: 32px;
+    width: 150px;
     height: 30px;
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #bestScore, #container.resetting #bestScore, #container.onready #bestScore{
+#container.playing #bestScore, #container.resetting #bestScore, #container.onready #bestScore, #container.endscore #bestScore {
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #rBtn1, #container.resetting #rBtn1, #container.onready #rBtn1 {
+#container.playing #rBtn1, #container.resetting #rBtn1, #container.onready #rBtn1, #container.endscore #rBtn1 {
     transform: translatey(0px) scale(1);
 }
 
-#container.playing #cBtn, #container.resetting #cBtn, #container.onready #cBtn {
+#container.playing #cBtn, #container.resetting #cBtn, #container.onready #cBtn, #container.endscore #cBtn {
     transform: translatey(0px) scale(1);
 }

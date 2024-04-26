@@ -91,7 +91,7 @@ var Block = /** @class */ (function () {
             var r = Math.sin(0.3 * offset) * 55 + 200;
             var g = Math.sin(0.3 * offset + 2) * 55 + 200;
             var b = Math.sin(0.3 * offset + 4) * 55 + 200;
-            if (randomNumber == 2 && currentMode == 'hard') {
+            if (randomNumber == 2 && currentMode == 'Hard') {
                 this.color = 0xFF0000;
                 basic = 'n';
             }else {
@@ -198,7 +198,8 @@ var Game = /** @class */ (function () {
             'RESETTING': 'resetting',
             'STARTED': 'started',
             'ACTIVE': 'active',
-            'ONREADY': 'onready'
+            'ONREADY': 'onready',
+            'ENDSCORE': 'endscore'
         };
         this.blocks = [];
         this.state = this.STATES.LOADING;
@@ -255,35 +256,44 @@ var Game = /** @class */ (function () {
         var isCloseClicked = false;
 
         if (restartButton) {
-            restartButton.addEventListener('click',function () {
-                if (isCloseClicked) {
+            restartButton.addEventListener('click',function (e) {
+
+                if (document.getElementById('goPopup').style.display === 'block') {
                     e.preventDefault();
                     return false;
                 }
-                noticePopup.style.display = 'block';
-                isRestartClicked = true;
 
-                var currentBlock = game.blocks[game.blocks.length - 1];
-                currentBlock.state = game.STATES.STOPPED;
+                if (document.querySelector('.nPopup').style.display !== 'block') {
+                    if (isCloseClicked) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    noticePopup.style.display = 'block';
+                    isRestartClicked = true;
+    
+                    var currentBlock = game.blocks[game.blocks.length - 1];
+                    currentBlock.state = game.STATES.STOPPED;
+                    
+                    document.getElementById('sbtn').addEventListener('click', function () {
+                        game.restartGame();
+                        noticePopup.style.display = 'none';
+                        isRestartClicked = false;
+                    });
+    
+                    document.getElementById('backBtn').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        normalButton.style.display = 'none';
+                        hardButton.style.display = 'none';
+                        location.reload();
+                        isRestartClicked = false;
+                    });
+                }
                 
-                document.getElementById('sbtn').addEventListener('click', function () {
-                    game.restartGame();
-                    noticePopup.style.display = 'none';
-                    isRestartClicked = false;
-                });
-
-                document.getElementById('backBtn').addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    normalButton.style.display = 'none';
-                    hardButton.style.display = 'none';
-                    location.reload();
-                    isRestartClicked = false;
-                });
             });
         }
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'q' && _this.state === _this.STATES.PLAYING) {
+            if (e.key === 'q' && (_this.state === _this.STATES.PLAYING || _this.state === _this.STATES.ENDSCORE)) {
                 if (isCloseClicked) {
                     e.preventDefault();
                     return false;
@@ -311,17 +321,24 @@ var Game = /** @class */ (function () {
 
         if (closeButton) {
             closeButton.addEventListener('click', function (e) {
-                if (isRestartClicked) {
+                if (document.getElementById('goPopup').style.display === 'block') {
                     e.preventDefault();
                     return false;
                 }
 
-                isCloseClicked = true;
-                document.getElementById('ePopup').style.display = 'block';
-
-                var currentBlock = game.blocks[game.blocks.length - 1];
-                currentBlock.state = game.STATES.STOPPED;
-                console.log('Close button clicked');
+                if (document.querySelector('.nPopup').style.display !== 'block') {
+                    if (isRestartClicked) {
+                        e.preventDefault();
+                        return false;
+                    }
+    
+                    isCloseClicked = true;
+                    document.getElementById('ePopup').style.display = 'block';
+    
+                    var currentBlock = game.blocks[game.blocks.length - 1];
+                    currentBlock.state = game.STATES.STOPPED;
+                    console.log('Close button clicked');
+                }
             });
 
             var continew = document.getElementById('okBtn');
@@ -340,22 +357,22 @@ var Game = /** @class */ (function () {
                     currentBlock.state = game.STATES.ACTIVE;
                     console.log('Popup close button clicked');
 
-                        game.state = game.STATES.PLAYING;
-                        game.tick();
-                        currentBlock.tick();
+                    game.state = game.STATES.PLAYING;
+                    // game.tick();
+                    // currentBlock.tick();
                 });
             }
         }
         
         normalButton.addEventListener('click', function () {
-            currentMode = 'normal';
+            currentMode = 'Normal';
             game.updateState(game.STATES.ONREADY);
             document.getElementById('score').innerText = currentMode + ' : 0 ';
             _this.showNoticePopup();
         });
 
         hardButton.addEventListener('click', function () {
-            currentMode = 'hard';
+            currentMode = 'Hard';
             document.getElementById('score').innerText = currentMode + ' : 0 ';
             game.updateState(game.STATES.ONREADY);
             _this.showNoticePopup();
@@ -364,9 +381,11 @@ var Game = /** @class */ (function () {
 
         var backBtn = document.getElementById('backBtn');
         backBtn.addEventListener('click', function() {
+            location.reload();
+           
             noticePopup.style.display = 'none';
-            normalButton.style.display = 'block';
-            hardButton.style.display = 'block';
+            // normalButton.style.display = 'block';
+            // hardButton.style.display = 'block';
         });
     }
 
@@ -376,7 +395,7 @@ var Game = /** @class */ (function () {
         var noticePopup = document.querySelector('.nPopup');
         normalButton.style.display = 'none';
         hardButton.style.display = 'none';
-        noticePopup.style.display = 'block';
+        noticePopup.style.display = 'block';      
     };
 
     Game.prototype.hideNoticePopup = function () {
@@ -419,7 +438,8 @@ var Game = /** @class */ (function () {
 
     Game.prototype.startGame = function () {
         if (this.state != this.STATES.PLAYING) {
-            this.state = game.STATES.PLAYING;
+            this.state = this.STATES.PLAYING;
+            this.updateState(this.STATES.PLAYING);
             document.getElementById('score').innerText = currentMode + ' : 0 ';
             this.bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
             this.updateScoreDisplay();
@@ -459,8 +479,8 @@ var Game = /** @class */ (function () {
         var cameraMoveSpeed = removeSpeed * 2 + (oldBlocks.length * delayAmount);
         this.stage.setCamera(2, cameraMoveSpeed);
         var countdown = { value: this.blocks.length - 1 };
-        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.scoreContainer.innerHTML =  currentMode + ' : ' + String(Math.round(countdown.value)); } });
-        TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.bestScoreContainer.innerHTML =  'Best Score: ' + String(Math.round(countdown.value)); } });
+        // TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.scoreContainer.innerHTML =  currentMode + ' : ' + String(Math.round(countdown.value)); } });
+        // TweenLite.to(countdown, cameraMoveSpeed, { value: 0, onUpdate: function () {_this.bestScoreContainer.innerHTML =  'Best Score: ' + String(Math.round(countdown.value)); } });
         this.blocks = this.blocks.slice(0, 1);
         this.addBlock();
         
@@ -484,6 +504,11 @@ var Game = /** @class */ (function () {
         var newBlocks = currentBlock.place();
         this.newBlocks.remove(currentBlock.mesh);
 
+        if (newBlocks.placed) {
+            this.placedBlocks.add(newBlocks.placed);
+            this.playBlockSound();
+        }
+
         if (newBlocks.placed)
             this.placedBlocks.add(newBlocks.placed);
 
@@ -506,8 +531,6 @@ var Game = /** @class */ (function () {
 
             TweenLite.to(newBlocks.chopped.position, 1, positionParams);
             TweenLite.to(newBlocks.chopped.rotation, 1, rotationParams);
-
-            this.playBlockSound();
         }
         this.addBlock();
     };
@@ -519,7 +542,7 @@ var Game = /** @class */ (function () {
             if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
                 return this.endGame();
             }
-            this.score = this.blocks.length - 1;
+            this.score = (this.blocks.length -1) >= 0 ? (this.blocks.length -1) : 0 ;
             this.scoreContainer.innerHTML = currentMode + " : " + this.score;
             this.bestScoreContainer.innerHTML = 'Best Score: ' + this.bestScore;
             var newKidOnTheBlock = new Block(lastBlock);
@@ -541,44 +564,56 @@ var Game = /** @class */ (function () {
     };
 
     Game.prototype.endGame = function () {
-        this.gameOverPopup = document.getElementById('goPopup');
-        this.gameOverPopup.style.display = 'block';
+        var gameOverPopup = document.getElementById('goPopup');
+        gameOverPopup.style.display = 'block';
+
         var finalScoreElement = document.getElementById('final-score');
         var bestScoreElement = document.getElementById('best-score');
         var rBtnElement = document.getElementById('rBtn');
-        
-        if (finalScoreElement) {
-            finalScoreElement.textContent = currentMode + " : " + this.score;
-        } else {
-            console.error("Final score display element not found.");
-        }
-    
-        if (bestScoreElement) {
-            bestScoreElement.textContent = 'Best Score: ' + this.bestScore;
-        } else {
-            console.error("Best score display element not found.");
-        }
-
-        rBtnElement.addEventListener('click', function () {
-            var noticePopup = document.querySelector('.nPopup');
-            var gameOverPopup = document.getElementById('goPopup');
-            noticePopup.style.display = 'block';
-            gameOverPopup.style.display = 'none';
-
-            document.getElementById('sbtn').addEventListener('click', function () {
-                game.restartGame();
-                noticePopup.style.display = 'none';
-            });
-        });
-
         var nBtnElement = document.getElementById('nBtn');
-        nBtnElement.addEventListener('click', function () {
-            location.reload();
+        var noticePopup = document.querySelector('.nPopup');
+
+        if (gameOverPopup) {
+            if (gameOverPopup.style.display == 'block') {
+                if (finalScoreElement) {
+                    finalScoreElement.textContent = this.score;
+                } else {
+                    console.error("Final score display element not found.");
+                }
+            
+                if (bestScoreElement) {
+                    bestScoreElement.textContent = 'Best Score: ' + this.bestScore;
+                } else {
+                    console.error("Best score display element not found.");
+                }
+
+                rBtnElement.addEventListener('click', function () {
+                    noticePopup.style.display = 'block';
+                    gameOverPopup.style.display = 'none';
+        
+                    document.getElementById('sbtn').addEventListener('click', function () {
+                        game.restartGame();
+                        noticePopup.style.display = 'none';
+                    });
+                });
+        
+                nBtnElement.addEventListener('click', function () {
+                    location.reload();
+                });
+            }
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'q') {
+                gameOverPopup.style.display = 'none';
+                noticePopup.style.display = 'block';
+            }
         });
-    
+
         this.updateBestScore();
         this.updateScoreDisplay();
-        this.updateState(this.STATES.ENDED);
+        // this.updateState(this.STATES.ENDED);
+        this.updateState(this.STATES.ENDSCORE);
 
         stopBackgroundMusic();
     };
